@@ -1,24 +1,31 @@
 package com.os.activity;
 import java.lang.ref.WeakReference;
+import java.util.List;
+
 import com.os.activity.base.BaseFragmentActivity;
 import com.os.activity.base.BaseSlidingFragment;
 import com.os.activity.sliding.LeftFragment;
 
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
+import com.os.model.Article;
 import com.os.slidingmenu.R;
-import com.os.ui.MainHallFragment;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import com.os.utility.DatabaseDealer;
+import com.os.utility.DocParser;
 
 
 public class MainActivity extends BaseFragmentActivity {
 	private Fragment mCurFragment;
 	public static SlidingMenu mSlidingMenu;
 	private Handler handler = new MyHandler(this);
+    public List<Article> top10;
+    private Thread getUserInfo;
+
 	private static class MyHandler extends Handler {
 		private final WeakReference<MainActivity> mActivity;
 
@@ -37,19 +44,41 @@ public class MainActivity extends BaseFragmentActivity {
 	}
 	
 	private void handleMsg(Message msg) {
-	
+        top10 = (List<Article>)msg.obj;
 	}
 
+    private void initComplements(){
+        getUserInfo = new Thread(new Runnable() {
+            @Override public
+            void run() {
+
+                List<Article> topList = DocParser.getArticleTitleList(
+                        "http://bbs.nju.edu.cn/bbstop10", 3,
+                        DatabaseDealer.getBlockList(MainActivity.this));
+
+                if(topList == null){
+                    handler.sendEmptyMessage(0);
+                    return;
+                }
+
+                Message msg = new Message();
+                msg.what = 0x001;
+                msg.obj = topList;
+                handler.sendMessage(msg);
+            }
+        });
+    }
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		initViews();
-		
+	    initComplements();
 
 		if (savedInstanceState != null) {
 			mCurFragment = getSupportFragmentManager().getFragment(savedInstanceState, "mCurContent");
 		}
+        getUserInfo.start();
 	}
 
 	@Override

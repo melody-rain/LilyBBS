@@ -10,44 +10,48 @@ import android.widget.TextView;
 import com.os.activity.MainActivity;
 import com.os.activity.base.BaseSlidingFragment;
 import com.os.adapter.PagerAdapter;
+import com.os.model.Article;
 import com.os.slidingmenu.R;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 import com.os.ui.ui2.FirstFragment;
 import com.os.ui.ui2.SecondFragment;
 import com.os.ui.ui2.ThirdFragment;
 
-
+import java.util.List;
 
 
 public class MainHallFragment extends BaseSlidingFragment implements OnClickListener {
-	private ViewPager mViewPager;
-	private TextView mHomePage;
-	private TextView mFocus;
-	private TextView mMine;
-	
-	
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.x_hall);
-	}
-	@Override
-	public void initViews() {
-		mViewPager = (ViewPager) findViewById(R.id.pager);
-		mHomePage = (TextView) findViewById(R.id.tv_home);
-		mFocus = (TextView) findViewById(R.id.tv_focus);
-		mMine = (TextView) findViewById(R.id.tv_my);
+    private ViewPager     mViewPager;
+    private TextView      mHomePage;
+    private TextView      mFocus;
+    private TextView      mMine;
 
-		PagerAdapter mPagerAdapter = new PagerAdapter(getActivity());
+    @Override
+    public
+    void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.x_hall);
+    }
 
-	
-		mViewPager.setCurrentItem(0);
-		mPagerAdapter.addTab(FirstFragment.class, null);
-		mPagerAdapter.addTab(SecondFragment.class, null);
-		mPagerAdapter.addTab(ThirdFragment.class, null);
-		mViewPager.setAdapter(mPagerAdapter);
-		mViewPager.setOffscreenPageLimit(2);
-	}
+    @Override
+    public
+    void initViews() {
+        mViewPager = (ViewPager) findViewById(R.id.pager);
+        mHomePage = (TextView) findViewById(R.id.tv_home);
+        mFocus = (TextView) findViewById(R.id.tv_focus);
+        mMine = (TextView) findViewById(R.id.tv_my);
+
+        PagerAdapter mPagerAdapter = new PagerAdapter(getActivity());
+
+        mViewPager.setCurrentItem(0);
+        mPagerAdapter.addTab(FirstFragment.class, null);
+        mPagerAdapter.addTab(SecondFragment.class, null);
+        mPagerAdapter.addTab(ThirdFragment.class, null);
+        mViewPager.setAdapter(mPagerAdapter);
+        mViewPager.setOffscreenPageLimit(2);
+
+        ((FirstFragment)mPagerAdapter.getItem(0)).topList = getFragmentActivity(MainActivity.class).top10;
+    }
 	
 	@Override
 	public void addListener() {
@@ -64,19 +68,19 @@ public class MainHallFragment extends BaseSlidingFragment implements OnClickList
 			public void onPageSelected(int position) {
 				switch (position) {
 				case 0:
-					mHomePage.setTextColor(getResources().getColor(R.color.text_pink));
+					mHomePage.setTextColor(getResources().getColor(R.color.blue));
 					mFocus.setTextColor(getResources().getColor(R.color.text_gray));
 					mMine.setTextColor(getResources().getColor(R.color.text_gray));
 					break;
 				case 1:
 					mHomePage.setTextColor(getResources().getColor(R.color.text_gray));
-					mFocus.setTextColor(getResources().getColor(R.color.text_pink));
+					mFocus.setTextColor(getResources().getColor(R.color.blue));
 					mMine.setTextColor(getResources().getColor(R.color.text_gray));
 					break;
 				case 2:
 					mHomePage.setTextColor(getResources().getColor(R.color.text_gray));
 					mFocus.setTextColor(getResources().getColor(R.color.text_gray));
-					mMine.setTextColor(getResources().getColor(R.color.text_pink));
+					mMine.setTextColor(getResources().getColor(R.color.blue));
 					break;
 				default:
 					MainActivity.mSlidingMenu.setTouchModeAbove(SlidingMenu.TOUCHMODE_MARGIN);
