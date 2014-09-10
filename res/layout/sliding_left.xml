@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@drawable/sliding_left_bg"
+    android:orientation="vertical" >
+
+    <!-- 直播大厅 -->
+
+    <LinearLayout
+        android:layout_marginBottom="30dp"
+        android:layout_marginTop="30dp"
+        android:id="@+id/menu_livehall_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/menu_livehall_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/sliding_livehall_icon_normal" />
+
+        <TextView
+            android:layout_gravity="center"
+            android:id="@+id/menu_livehall_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="直播大厅" />
+    </LinearLayout>
+
+    <!-- 我的关注 -->
+
+    <LinearLayout
+        android:layout_marginBottom="30dp"
+        android:layout_marginTop="30dp"
+        android:id="@+id/menu_follow_layout"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" >
+
+        <ImageView
+            android:id="@+id/menu_follow_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/sliding_follow_icon_normal" />
+
+        <TextView
+            android:layout_gravity="center"
+            android:id="@+id/menu_follow_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="我的关注" />
+    </LinearLayout>
+
+    <!-- 排行榜 -->
+
+    <LinearLayout
+        android:layout_marginTop="30dp"
+        android:id="@+id/menu_rank_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <ImageView
+            android:id="@+id/menu_rank_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/sliding_rank_icon_normal" />
+
+        <TextView
+            android:layout_gravity="center"
+            android:id="@+id/menu_rank_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="排行榜" />
+    </LinearLayout>
+
+</LinearLayout>

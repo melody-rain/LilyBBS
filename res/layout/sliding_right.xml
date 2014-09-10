@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@drawable/sliding_left_bg"
+    android:orientation="vertical" >
+    <TextView
+        android:id="@+id/menu_host_level_all"
+        android:layout_width="fill_parent"
+        android:layout_height="47dp"
+        android:background="@drawable/sliding_msg_recharge_bg"
+        android:text="全部" />
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="35dp"
+        android:background="@drawable/sliding_level_bg"
+        android:gravity="center_vertical" >
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:src="@drawable/sliding_level_icon" />
+        <TextView
+            style="@style/sliding_menu_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:text="按等级观看" />
+    </LinearLayout>
+    <TextView
+        android:id="@+id/menu_host_level_1"
+        style="@style/sliding_right_menu_text"
+        android:text="皇冠" />
+    <TextView
+        android:id="@+id/menu_host_level_2"
+        style="@style/sliding_right_menu_text"
+        android:text="钻石" />   
+    <TextView
+        android:id="@+id/menu_host_level_3"
+        style="@style/sliding_right_menu_text"
+        android:text="星级" />
+    <TextView
+        android:id="@+id/menu_host_level_4"
+        style="@style/sliding_right_menu_text"
+        android:text="红心" />
+</LinearLayout>

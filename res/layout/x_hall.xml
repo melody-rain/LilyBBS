@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+   android:background="@android:color/holo_green_dark"
+    android:orientation="vertical" >
+    <RelativeLayout
+        android:background="@android:color/holo_red_light"
+        android:id="@+id/title_bar"
+        android:layout_width="fill_parent"
+        android:layout_height="40dp" >
+
+   
+
+        <TextView
+            android:id="@+id/title_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="@string/livehall" />
+
+       
+    </RelativeLayout>
+    <LinearLayout
+        android:id="@+id/ll_tab"
+        android:layout_width="fill_parent"
+        android:layout_height="36dp"
+        android:layout_below="@+id/title_bar"
+        android:background="@drawable/recharge_tab_bg"
+        android:gravity="center_vertical"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:id="@+id/tv_home"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.0"
+            android:gravity="center"
+            android:text="@string/home_page"
+            android:textColor="@color/text_pink"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/tv_focus"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.0"
+            android:gravity="center"
+            android:text="@string/focus"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/tv_my"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.0"
+            android:gravity="center"
+            android:text="@string/my"
+            android:textSize="14sp" />
+    </LinearLayout>
+	<android.support.v4.view.ViewPager
+        android:id="@+id/pager"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@+id/ll_tab" />
+</LinearLayout>
