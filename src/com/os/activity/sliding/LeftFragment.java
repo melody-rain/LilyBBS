@@ -2,6 +2,8 @@ package com.os.activity.sliding;
 
 import java.util.Arrays;
 
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import com.os.activity.MainActivity;
 import com.os.activity.base.BaseSlidingFragment;
 import com.os.slidingmenu.R;
@@ -112,6 +114,7 @@ public class LeftFragment extends BaseSlidingFragment {
 			setMenuChecked(index);
 		}
 		clazz = FRAGMENTS_CLASSES[index];
+
 		getFragmentActivity(MainActivity.class).switchCenterFragment(clazz);
 		mCurrentIndex = index;
 		

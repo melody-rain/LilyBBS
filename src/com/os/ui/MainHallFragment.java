@@ -3,6 +3,7 @@ package com.os.ui;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
@@ -26,6 +27,8 @@ public class MainHallFragment extends BaseSlidingFragment implements OnClickList
     private TextView      mFocus;
     private TextView      mMine;
 
+    private PagerAdapter mPagerAdapter;
+
     @Override
     public
     void onCreate(Bundle savedInstanceState) {
@@ -41,7 +44,7 @@ public class MainHallFragment extends BaseSlidingFragment implements OnClickList
         mFocus = (TextView) findViewById(R.id.tv_focus);
         mMine = (TextView) findViewById(R.id.tv_my);
 
-        PagerAdapter mPagerAdapter = new PagerAdapter(getActivity());
+        mPagerAdapter = new PagerAdapter(getActivity());
 
         mViewPager.setCurrentItem(0);
         mPagerAdapter.addTab(FirstFragment.class, null);
@@ -49,8 +52,6 @@ public class MainHallFragment extends BaseSlidingFragment implements OnClickList
         mPagerAdapter.addTab(ThirdFragment.class, null);
         mViewPager.setAdapter(mPagerAdapter);
         mViewPager.setOffscreenPageLimit(2);
-
-        ((FirstFragment)mPagerAdapter.getItem(0)).topList = getFragmentActivity(MainActivity.class).top10;
     }
 	
 	@Override
@@ -102,7 +103,7 @@ public class MainHallFragment extends BaseSlidingFragment implements OnClickList
 		switch(v.getId()){
 		case R.id.tv_home:
 			mViewPager.setCurrentItem(0);
-			break;
+            break;
 		case R.id.tv_focus:
 			mViewPager.setCurrentItem(1);
 			break;

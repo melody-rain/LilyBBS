@@ -2,6 +2,8 @@ package com.os.activity;
 import java.lang.ref.WeakReference;
 import java.util.List;
 
+import android.util.Log;
+import android.widget.Toast;
 import com.os.activity.base.BaseFragmentActivity;
 import com.os.activity.base.BaseSlidingFragment;
 import com.os.activity.sliding.LeftFragment;
@@ -15,18 +17,24 @@ import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import com.os.ui.FollowFragment;
+import com.os.ui.MainHallFragment;
+import com.os.ui.RankFragment;
 import com.os.utility.DatabaseDealer;
 import com.os.utility.DocParser;
-
 
 public class MainActivity extends BaseFragmentActivity {
 	private Fragment mCurFragment;
 	public static SlidingMenu mSlidingMenu;
 	private Handler handler = new MyHandler(this);
-    public List<Article> top10;
+    public List<Article> topList;
     private Thread getUserInfo;
 
-	private static class MyHandler extends Handler {
+    private MainHallFragment mainHallFragment;
+    private RankFragment rankFragment;
+    private FollowFragment followFragment;
+    public boolean isQuit;
+    private static class MyHandler extends Handler {
 		private final WeakReference<MainActivity> mActivity;
 
 		public MyHandler(MainActivity activity) {
@@ -44,7 +52,9 @@ public class MainActivity extends BaseFragmentActivity {
 	}
 	
 	private void handleMsg(Message msg) {
-        top10 = (List<Article>)msg.obj;
+        Toast.makeText(MainActivity.this, "网络连接失败，请稍后再试", Toast.LENGTH_SHORT).show();
+        isQuit = true;
+        finish();
 	}
 
     private void initComplements(){
@@ -52,7 +62,7 @@ public class MainActivity extends BaseFragmentActivity {
             @Override public
             void run() {
 
-                List<Article> topList = DocParser.getArticleTitleList(
+                topList = DocParser.getArticleTitleList(
                         "http://bbs.nju.edu.cn/bbstop10", 3,
                         DatabaseDealer.getBlockList(MainActivity.this));
 
@@ -60,17 +70,13 @@ public class MainActivity extends BaseFragmentActivity {
                     handler.sendEmptyMessage(0);
                     return;
                 }
-
-                Message msg = new Message();
-                msg.what = 0x001;
-                msg.obj = topList;
-                handler.sendMessage(msg);
             }
         });
     }
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+        isQuit = false;
 		setContentView(R.layout.activity_main);
 		initViews();
 	    initComplements();
@@ -116,6 +122,7 @@ public class MainActivity extends BaseFragmentActivity {
 			FragmentManager fm = getSupportFragmentManager();
 			FragmentTransaction ft = fm.beginTransaction();
 			Fragment userFragment = fm.findFragmentByTag(clazz.getName());
+
 			if (userFragment == null) {
 				isInit = true;
 				try {
@@ -142,16 +149,6 @@ public class MainActivity extends BaseFragmentActivity {
 			ft.commitAllowingStateLoss();
 
 			mCurFragment = userFragment;
-
-//			if (MainHallFragment.class.getName().equals(clazz.getName()))
-//            {
-//				mSlidingMenu.setMode(SlidingMenu.LEFT);
-//				if (!isInit) {
-//					((MainHallFragment) userFragment).postScrollTop();
-//
-//				}
-//
-//			}
 			
 			postShowContent(200);
 		} catch (Exception e) {
