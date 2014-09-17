@@ -2,8 +2,12 @@ package com.os.activity;
 import java.lang.ref.WeakReference;
 import java.util.List;
 
+import android.content.Intent;
 import android.util.Log;
 import android.widget.Toast;
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import com.os.activity.base.BaseFragmentActivity;
 import com.os.activity.base.BaseSlidingFragment;
 import com.os.activity.sliding.LeftFragment;
@@ -76,6 +80,11 @@ public class MainActivity extends BaseFragmentActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+        ActionBar bar = getSupportActionBar();
+        bar.setTitle("南京大学小百合");
+        bar.setIcon(R.drawable.nju_logo_purple);
+
         isQuit = false;
 		setContentView(R.layout.activity_main);
 		initViews();
@@ -86,6 +95,19 @@ public class MainActivity extends BaseFragmentActivity {
 		}
         getUserInfo.start();
 	}
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu){
+        menu.add("设置").setIcon(R.drawable.ic_launcher_settings).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+        Intent intent = new Intent(this, SettingActivity.class);
+        startActivity(intent);
+        return true;
+    }
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
+    <header android:fragment="com.os.ui.ui2.SignatureFragment"
+            android:title="签名档"
+            android:summary="更改发帖或者回帖的签名档"/>
+
+    <header android:fragment="com.os.ui.ui2.ImageUtilFragment"
+            android:title="图片显示"
+            android:summary="何种情况下显示图片"/>
+
+    <header android:fragment="com.os.ui.ui2.SignatureFragment"
+            android:title="检查更新"
+            android:summary="检查新版本客户端"/>
+
+    <header android:fragment="com.os.ui.ui2.AboutFragment"
+            android:title="关于"
+            android:summary="关于开发者"/>
+</preference-headers>

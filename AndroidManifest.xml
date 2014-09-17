@@ -5,7 +5,7 @@
     android:versionName="1.0" >
 
     <uses-sdk
-        android:minSdkVersion="8"
+        android:minSdkVersion="11"
         android:targetSdkVersion="18" />
 
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
@@ -14,17 +14,29 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@drawable/nju"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/Theme.Sherlock.Light">
         <activity
             android:name="com.os.activity.MainActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            android:theme="@style/Theme.Sherlock.Light">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+
+        <activity
+                android:name="com.os.activity.ArticleActivity">
+        </activity>
+
+        <activity
+                android:name="com.os.activity.SettingActivity">
+        </activity>
+        <activity
+                android:name="com.os.activity.ReplyArticle">
         </activity>
     </application>
 

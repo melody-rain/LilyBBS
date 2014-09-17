@@ -1,11 +1,14 @@
 package com.os.ui.ui2;
 
 
+import android.content.Intent;
 import android.os.Message;
 import android.util.Log;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+import com.os.activity.ArticleActivity;
 import com.os.activity.MainActivity;
 import com.os.model.Article;
 import com.os.slidingmenu.R;
@@ -32,17 +35,17 @@ public class FirstFragment extends Fragment {
     private View viewFragment;
     public List<Article> topList;
     private List<Map<String, Object>> dataMap;
-    private List<String> titleData;
     private Thread getTopList;
     private ListView lv;
-    private ArrayAdapter<String> aa;
+    private SimpleAdapter sa;
     private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             if (topList != null) {
-                List<String> titleDataTmp = getData1();
-                titleData.addAll(titleDataTmp);
-                aa.notifyDataSetChanged();
+                List<Map<String, Object>> titleDataTmp = getData();
+                dataMap.addAll(titleDataTmp);
+
+                sa.notifyDataSetChanged();
             }
         }
     };
@@ -68,23 +71,25 @@ public class FirstFragment extends Fragment {
     public View onCreateView(
             LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
+        dataMap = new ArrayList<Map<String, Object>>();
 
-        titleData = new ArrayList<String>();
-        aa = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, titleData);
+        sa = new SimpleAdapter(getActivity(), dataMap, R.layout.list_hot, new String[] {"title","board", "author"},
+                new int[] {R.id.lh_title, R.id.lh_board, R.id.lh_author});
+
         viewFragment = inflater.inflate(R.layout.first, null);
         waitTopList();
         getTopList.start();
 
         lv = (ListView) viewFragment.findViewById(R.id.top_list);
-        lv.setAdapter(aa);
+        lv.setAdapter(sa);
+
+        addListener();
+
         return viewFragment;
     }
 
     private List<Map<String, Object>> getData() {
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
-        if (topList == null) {
-            topList = DocParser.getArticleTitleList("http://bbs.nju.edu.cn/bbstop10", 3, DatabaseDealer.getBlockList(getActivity()));
-        }
         for (Article article : topList) {
             Map<String, Object> map = new HashMap<String, Object>();
             map.put("title", article.getTitle());
@@ -95,17 +100,16 @@ public class FirstFragment extends Fragment {
         return list;
     }
 
-    private List<String> getData1() {
-        List<String> list = new ArrayList<String>();
-
-//        if(topList == null) {
-//            topList = DocParser.getArticleTitleList("http://bbs.nju.edu.cn/bbstop10", 3, DatabaseDealer.getBlockList(getActivity()));
-//        }
-        for (Article article : topList) {
-            list.add(article.getTitle());
-        }
-        return list;
+    private void addListener(){
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(getActivity(), ArticleActivity.class);
+                intent.putExtra("board", topList.get(position).getBoard());
+                intent.putExtra("contentUrl", topList.get(position).getContentUrl());
+                intent.putExtra("title", topList.get(position).getTitle());
+                startActivity(intent);
+            }
+        });
     }
-
-
 }

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+        xmlns:android="http://schemas.android.com/apk/res/android">
+    <EditTextPreference
+            android:key="signatureEditText"
+            android:title="点击修改签名档"
+            android:defaultValue="Sent from my Android Client"/>
+</PreferenceScreen>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <ListPreference
+            android:key="image_display"
+            android:entries="@array/options"
+            android:entryValues="@array/option_vale"
+            android:title="选择显示图片的环境"
+            android:defaultValue="0"/>
+</PreferenceScreen>
