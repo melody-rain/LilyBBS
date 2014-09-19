@@ -16,23 +16,28 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="账号"
-            android:textColor="#FFFFFF"/>
+            android:textColor="#FFFFFF"
+            android:id="@+id/account"/>
 
     <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="密码"
-            android:textColor="#FFFFFF"/>
+            android:textColor="#FFFFFF"
+            android:id="@+id/passwd"
+            android:password="true"/>
+
     <CheckBox
             android:layout_marginTop="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/record_login_info_bt"
+            android:id="@+id/autoLogin"
             android:text="自动登录"
             android:layout_gravity="center"
             style="@style/checkBoxStyle"
             android:textColor="#FFFFFF"
             android:layout_marginBottom="10dp"/>
+
     <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -44,12 +49,14 @@
                 android:text="登录"
                 android:gravity="center"
                 android:layout_marginRight="20dp"/>
+
         <Button
-                android:id="@+id/login_guess_bt"
+                android:id="@+id/logout_bt"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:text="游客"
-                android:gravity="center"/>
+                android:text="注销"
+                android:gravity="center"
+                android:layout_marginRight="20dp"/>
     </LinearLayout>
     <!-- 直播大厅 -->
 
@@ -71,7 +78,7 @@
                 android:id="@+id/menu_livehall_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="直播大厅"/>
+                android:text="小百合主页"/>
     </LinearLayout>
 
     <!-- 我的关注 -->
@@ -87,14 +94,15 @@
                 android:id="@+id/menu_follow_icon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/sliding_follow_icon_normal"/>
+                android:src="@drawable/mail_normal"/>
 
         <TextView
                 android:layout_gravity="center"
                 android:id="@+id/menu_follow_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="我的关注"/>
+                android:text="我的邮箱"
+                android:paddingLeft="5dp"/>
     </LinearLayout>
 
     <!-- 排行榜 -->

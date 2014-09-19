@@ -10,7 +10,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static int VERSION = 1;
-    private static String CREATE_USERINFO_TABLE = "create table userinfo(_id INTEGER PRIMARY KEY,username text,password text)";
+    private static String CREATE_USERINFO_TABLE = "create table userinfo(_id INTEGER PRIMARY KEY,username text,password text,isAutoLogin integer)";
     private static String CREATE_BOARD_TABLE = "create table board(_id INTEGER PRIMARY KEY,english text,chinese text)";
     private static String CREATE_FAV_TABLE = "create table fav(_id INTEGER PRIMARY KEY,english text,chinese text,islocal integer)";
     private static String CREATE_SETTING_TABLE = "create table settings(_id INTEGER PRIMARY KEY,key text,value text)";
@@ -135,7 +135,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                              "('Complain', '投诉与举报')",
                              "('Computer_ABC', '电脑菜鸟要学飞')",
                              "('Consultant', '咨询')",
-                             "('Contest', '大学生竞赛')",
+                             "('Innov_Contest', '大学生竞赛')",
                              "('Couplet', '对联')",
                              "('CPA', '注册会计师')",
                              "('CPlusPlus', 'C++程序设计语言')",

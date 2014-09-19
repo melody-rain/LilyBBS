@@ -27,6 +27,9 @@ import java.util.Random;
  * Created by Jin on 2014/9/10.
  */
 public class DocParser {
+
+    private static int s;
+
     public static final List<Article> getArticleTitleList(String url, int tryTimes, List<String> blockList) {
         if (tryTimes <= 0) {
             return null;
@@ -207,7 +210,7 @@ public class DocParser {
         if(tryTimes <= 0) {
             return null;
         }
-        int s = new Random().nextInt(99999)%(90000) + 10000;
+        s = new Random().nextInt(99999)%(90000) + 10000;
         String urlString = "http://bbs.nju.edu.cn/vd" + String.valueOf(s) + "/bbslogin?type=2&id=" + username + "&pw=" + password;
         try {
             String doc = Jsoup.connect(urlString).get().toString();
@@ -230,6 +233,28 @@ public class DocParser {
             }
         } catch (IOException e) {
             return login(username, password, tryTimes - 1);
+        }
+    }
+
+    public static final boolean logout(Bundle bundle){
+        return logout(bundle.getString("username"), bundle.getString("password"), 3);
+    }
+
+    public static final boolean logout(String username, String password, int tryTimes) {
+        if(tryTimes <= 0) {
+            return false;
+        }
+        String urlString = "http://bbs.nju.edu.cn/vd" + String.valueOf(s) + "/bbslogout?type=2&id=" + username + "&pw=" + password;
+        try {
+            String doc = Jsoup.connect(urlString).get().toString();
+            return true;
+//            if (doc.indexOf("setCookie") < 0) {
+//                return logout(username, password, tryTimes - 1);
+//            } else {
+//                return true;
+//            }
+        } catch (IOException e) {
+            return logout(username, password, tryTimes - 1);
         }
     }
 
@@ -289,5 +314,51 @@ public class DocParser {
 //            finalString += ('\n' + "--" + sign);
 //        }
         return finalString;
+    }
+
+    public static final List<Article> getBoardArticleTitleList(String url, String boardName, int tryTimes, List<String>blockList) {
+        if(tryTimes <= 0) {
+            return null;
+        }
+        try {
+            List<Article> list = new ArrayList<Article>();
+            Document doc = Jsoup.connect(url).get();
+            Elements blocks = doc.select("tr");
+            for (Element block : blocks) {
+                Elements links = block.getElementsByTag("a");
+                if (links.size() == 0) {
+                    continue;
+                }
+                String authorName = links.get(0).select("a").text();
+                if(blockList.contains(authorName)) {
+                    continue;
+                }
+                Article article = new Article();
+                article.setAuthorName(authorName);
+                article.setAuthorUrl(links.get(0).select("a").attr("abs:href"));
+                article.setTitle(links.get(1).select("a").text());
+                article.setContentUrl(links.get(1).select("a").attr("abs:href"));
+                Elements fonts = block.getElementsByTag("font");
+                article.setView(Integer.valueOf(fonts.get(fonts.size() - 1).select("font").text()));
+                if (fonts.get(0).select("nobr").size() == 0) {
+                    article.setReply(Integer.valueOf(fonts.get(fonts.size() - 2).select("font").text()));
+                }
+                list.add(article);
+            }
+            String allString = doc.toString();
+            int i = allString.indexOf("<a href=\"bbstdoc?board=" + boardName + "&amp;start=");
+            String s = allString.substring(i);
+            Document subDoc = Jsoup.parse(allString.substring(i));
+            Elements links = subDoc.getElementsByTag("a");
+            Article article = new Article();
+            article.setBoard(links.get(0).select("a").attr("href"));
+            if (s.indexOf("下一页") > 0) {
+                article.setBoardUrl(links.get(1).select("a").attr("href"));
+            }
+            list.add(article);
+            return list;
+        } catch (IOException e) {
+            return getBoardArticleTitleList(url, boardName, tryTimes - 1, blockList);
+        }
     }
 }
