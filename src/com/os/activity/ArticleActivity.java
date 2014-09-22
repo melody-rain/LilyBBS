@@ -1,6 +1,8 @@
 package com.os.activity;
 
 import android.app.Activity;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.support.v4.app.FragmentManager;
 import android.app.ListActivity;
 import android.content.Intent;
@@ -27,10 +29,7 @@ import com.os.activity.sliding.SingleArticle;
 import com.os.slidingmenu.R;
 import com.os.ui.ui2.NewArticleFragment;
 import com.os.ui.ui2.ReplyArticleFragment;
-import com.os.utility.DatabaseDealer;
-import com.os.utility.DocParser;
-import com.os.utility.LoginHelper;
-import com.os.utility.LoginInfo;
+import com.os.utility.*;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
@@ -45,6 +44,11 @@ import java.util.Map;
 import android.view.View.OnClickListener;
 import android.text.Html.ImageGetter;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
 /**
  * Created by Jin on 2014/9/15.
  */
@@ -58,6 +62,9 @@ public class ArticleActivity extends SherlockFragmentActivity {
     private List<SingleArticle> singleList;
     private int selectedIndex;
     private int totalPage = 0;
+    private List<String> picPathList;
+    private Map<String,Bitmap> picMap;
+
     private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -84,7 +91,7 @@ public class ArticleActivity extends SherlockFragmentActivity {
         getSupportActionBar().setIcon(android.R.color.transparent);
     }
 
-    private void initList(boolean loadImage) {
+    private void initList(final boolean loadImage) {
         contentList = new ArrayList<Map<String, Object>>();
         Thread initContentThread = new Thread(new Runnable() {
             @Override
@@ -92,6 +99,9 @@ public class ArticleActivity extends SherlockFragmentActivity {
                 List<Map<String, Object>> contentListTmp;
                 while (true) {
                     contentListTmp = getData();
+                    if(loadImage){
+                        initPic();
+                    }
                     if (contentListTmp != null) {
                         contentList.addAll(contentListTmp);
                         handler.sendEmptyMessage(0);
@@ -102,6 +112,78 @@ public class ArticleActivity extends SherlockFragmentActivity {
         });
         initContentThread.start();
     }
+
+    private boolean isPic(String source) {
+        return source.startsWith("http://bbs.nju.edu.cn/file") &&
+                (source.endsWith(".jpg") || source.endsWith(".JPG") || source.endsWith(".png") ||
+                        source.endsWith(".PNG")|| source.endsWith(".bmp") || source.endsWith("jpeg") || source.endsWith("JPEG")
+                        || source.endsWith("gif") || source.endsWith("GIF"));
+    }
+
+
+
+    private void initPic() {
+        if (singleList == null || singleList.size() == 0) {
+            return;
+        }
+
+        picPathList = new ArrayList<String>();
+        for(SingleArticle article : singleList) {
+            String content = article.getContent();
+            if (content == null || content.indexOf("http://bbs.nju.edu.cn/file") < 0) {
+                continue;
+            }
+            Document doc = Jsoup.parse(content);
+            Elements imgs = doc.getElementsByTag("img");
+            for(Element pic: imgs) {
+                String path = pic.attr("src");
+                if(!isPic(path)) {
+                    continue;
+                }
+                picPathList.add(path);
+            }
+        }
+        if (picPathList.size() > 0) {
+
+            Thread savePic = new Thread(new Runnable() {
+
+                @Override
+                public void run() {
+                    for(int i = 0; i < picPathList.size(); i ++) {
+                        String source = picPathList.get(i);
+                        String picDir = FileDealer.getPicDirPath() + source.substring(source.lastIndexOf("/"));
+                        File file = new File(picDir);
+                        if (file.exists() && picMap == null) {
+                            picMap = new HashMap<String, Bitmap>();
+                            picMap.put(picDir, BitmapFactory.decodeFile(picDir));
+                        } else if (file.exists() && !picMap.containsKey(picDir)) {
+                            picMap.put(picDir, BitmapFactory.decodeFile(picDir));
+                        } else if (!file.exists() && (picMap != null && picMap.containsKey(picDir)
+                                && !picMap.get(picDir).isRecycled()) /*&& DatabaseDealer.getSettings(ArticleActivity.this).isSavePic()*/) {
+                            FileDealer.writeBitmap(picMap.get(picDir),picDir);
+                        } else {
+                            if(picMap == null) {
+                                picMap = new HashMap<String, Bitmap>();
+                            }
+                            picMap.put(picDir, FileDealer.downloadBitmap(source));
+//                    if(DatabaseDealer.getSettings(ArticleActivity.this).isSavePic()) {
+//                        Bitmap bm = picMap.get(picDir);
+//                        if(bm == null || picMap.get(picDir).isRecycled()) {
+//                            bm = FileDealer.downloadBitmap(source);
+//                        }
+//                        FileDealer.writeBitmap(picMap.get(picDir),picDir);
+//                    }
+                        }
+                    }
+                    Message msg = Message.obtain();
+                    handler.sendEmptyMessage(0);
+                }
+            });
+
+            savePic.start();
+        }
+    }
+
 
     private List<Map<String, Object>> getData() {
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
@@ -176,11 +258,11 @@ public class ArticleActivity extends SherlockFragmentActivity {
             author.setText((CharSequence) map.get("author"));
             floor.setText((CharSequence) map.get("floor"));
             String articleContent = (String) map.get("content");
-//            if (articleContent.contains("<img src='") || articleContent.contains("<uid>")) {
-//                content.setText(Html.fromHtml(articleContent, imageGetter, null));
-//            } else {
+            if (articleContent.contains("<img src='") || articleContent.contains("<uid>")) {
+                content.setText(Html.fromHtml(articleContent, imageGetter, null));
+            } else {
             content.setText(articleContent);
-//            }
+            }
 
             reply.setOnClickListener(new OnClickListener() {
 
@@ -248,194 +330,194 @@ public class ArticleActivity extends SherlockFragmentActivity {
 //                        || source.endsWith("gif") || source.endsWith("GIF"));
 //    }
 //
-//    private ImageGetter imageGetter = new ImageGetter() {
-//        public Drawable getDrawable(String source) {
-//            Drawable drawable;
-//            if(isPic(source)) {
-//                String picDir = FileDealer.getPicDirPath() + source.substring(source.lastIndexOf("/"));
-//                File file = new File(picDir);
-//                int width = (int) (getWindowManager().getDefaultDisplay().getWidth() * 0.9);
-//
-//                if (picMap != null && picMap.containsKey(picDir) && !picMap.get(picDir).isRecycled()) {
-//                    Bitmap bm= picMap.get(picDir);
-//                    drawable = new BitmapDrawable(bm);
-//                    int bmWidth = bm.getWidth();
-//                    int bmHeight = bm.getHeight();
-//                    drawable.setBounds(0, 0, width, width * bmHeight / bmWidth);
-//                    return drawable;
-//                } else if (file.exists() && BitmapFactory.decodeFile(picDir) != null) {
-//                    if (picMap == null) {
-//                        picMap = new HashMap<String, Bitmap>();
-//                    }
-//                    Bitmap bm = BitmapFactory.decodeFile(picDir);
-//                    picMap.put(picDir, bm);
-//                    drawable = new BitmapDrawable(bm);
-//                    int bmWidth = bm.getWidth();
-//                    int bmHeight = bm.getHeight();
-//                    drawable.setBounds(0, 0, width, width * bmHeight / bmWidth);
-//                    return drawable;
-//                } else {
-//                    drawable = getResources().getDrawable(R.drawable.downloading);
-//                    drawable.setBounds(0, 0, width, width * drawable.getIntrinsicHeight() / drawable.getIntrinsicWidth());
-//                    return drawable;
-//                }
-//            } else if(source.equals("emotion_s")) {
-//                drawable = getResources().getDrawable(R.drawable.emotion_s);
-//                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-//                return drawable;
-//            } else if(source.equals("emotion_o")) {
-//                drawable = getResources().getDrawable(R.drawable.emotion_o);
-//                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-//                return drawable;
-//            } else if(source.equals("emotion_v")) {
-//                drawable = getResources().getDrawable(R.drawable.emotion_v);
-//                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-//                return drawable;
-//            } else if(source.equals("emotion_d")) {
-//                drawable = getResources().getDrawable(R.drawable.emotion_d);
-//                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-//                return drawable;
-//            } else if(source.equals("emotion_x")) {
-//                drawable = getResources().getDrawable(R.drawable.emotion_x);
-//                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-//                return drawable;
-//            } else if(source.equals("emotion_q")) {
-//                drawable = getResources().getDrawable(R.drawable.emotion_q);
-//                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-//                return drawable;
-//            } else if(source.equals("emotion_a")) {
-//                drawable = getResources().getDrawable(R.drawable.emotion_a);
-//                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-//                return drawable;
-//            }else if(source.equals("emotion_p")) {
-//                drawable = getResources().getDrawable(R.drawable.emotion_p);
-//                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-//                return drawable;
-//            }else if(source.equals("emotion_e")) {
-//                drawable = getResources().getDrawable(R.drawable.emotion_e);
-//                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-//                return drawable;
-//            }else if(source.equals("emotion_h")) {
-//                drawable = getResources().getDrawable(R.drawable.emotion_h);
-//                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-//                return drawable;
-//            }else if(source.equals("emotion_b")) {
-//                drawable = getResources().getDrawable(R.drawable.emotion_b);
-//                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-//                return drawable;
-//            }else if(source.equals("emotion_c")) {
-//                drawable = getResources().getDrawable(R.drawable.emotion_c);
-//                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-//                return drawable;
-//            }else if(source.equals("emotion_f")) {
-//                drawable = getResources().getDrawable(R.drawable.emotion_f);
-//                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-//                return drawable;
-//            }else if(source.equals("emotion_g")) {
-//                drawable = getResources().getDrawable(R.drawable.emotion_g);
-//                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-//                return drawable;
-//            }else if(source.equals("emotion_i")) {
-//                drawable = getResources().getDrawable(R.drawable.emotion_i);
-//                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-//                return drawable;
-//            }else if(source.equals("emotion_j")) {
-//                drawable = getResources().getDrawable(R.drawable.emotion_j);
-//                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-//                return drawable;
-//            }else if(source.equals("emotion_k")) {
-//                drawable = getResources().getDrawable(R.drawable.emotion_k);
-//                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-//                return drawable;
-//            }else if(source.equals("emotion_l")) {
-//                drawable = getResources().getDrawable(R.drawable.emotion_l);
-//                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-//                return drawable;
-//            }else if(source.equals("emotion_m")) {
-//                drawable = getResources().getDrawable(R.drawable.emotion_m);
-//                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-//                return drawable;
-//            }else if(source.equals("emotion_n")) {
-//                drawable = getResources().getDrawable(R.drawable.emotion_n);
-//                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-//                return drawable;
-//            }else if(source.equals("emotion_r")) {
-//                drawable = getResources().getDrawable(R.drawable.emotion_r);
-//                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-//                return drawable;
-//            }else if(source.equals("emotion_t")) {
-//                drawable = getResources().getDrawable(R.drawable.emotion_t);
-//                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-//                return drawable;
-//            }else if(source.equals("emotion_u") ) {
-//                drawable = getResources().getDrawable(R.drawable.emotion_u);
-//                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-//                return drawable;
-//            }else if(source.equals("emotion_w")) {
-//                drawable = getResources().getDrawable(R.drawable.emotion_w);
-//                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-//                return drawable;
-//            }else if(source.equals("emotion_y")) {
-//                drawable = getResources().getDrawable(R.drawable.emotion_y);
-//                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-//                return drawable;
-//            }else if(source.equals("emotion_z")) {
-//                drawable = getResources().getDrawable(R.drawable.emotion_z);
-//                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-//                return drawable;
-//            }else if(source.equals("emotion_0")) {
-//                drawable = getResources().getDrawable(R.drawable.emotion_0);
-//                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-//                return drawable;
-//            }
-//            else if(source.equals("emotion_1")) {
-//                drawable = getResources().getDrawable(R.drawable.emotion_1);
-//                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-//                return drawable;
-//            }
-//            else if(source.equals("emotion_2")) {
-//                drawable = getResources().getDrawable(R.drawable.emotion_2);
-//                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-//                return drawable;
-//            }
-//            else if(source.equals("emotion_3")) {
-//                drawable = getResources().getDrawable(R.drawable.emotion_3);
-//                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-//                return drawable;
-//            }
-//            else if(source.equals("emotion_4")) {
-//                drawable = getResources().getDrawable(R.drawable.emotion_4);
-//                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-//                return drawable;
-//            }
-//            else if(source.equals("emotion_5")) {
-//                drawable = getResources().getDrawable(R.drawable.emotion_5);
-//                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-//                return drawable;
-//            }
-//            else if(source.equals("emotion_6")) {
-//                drawable = getResources().getDrawable(R.drawable.emotion_6);
-//                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-//                return drawable;
-//            }
-//            else if(source.equals("emotion_7")) {
-//                drawable = getResources().getDrawable(R.drawable.emotion_7);
-//                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-//                return drawable;
-//            }
-//            else if(source.equals("emotion_8")) {
-//                drawable = getResources().getDrawable(R.drawable.emotion_8);
-//                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-//                return drawable;
-//            }
-//            else if(source.equals("emotion_9")) {
-//                drawable = getResources().getDrawable(R.drawable.emotion_9);
-//                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-//                return drawable;
-//            }
-//            return null;
-//        }
-//    };
+    private ImageGetter imageGetter = new ImageGetter() {
+        public Drawable getDrawable(String source) {
+            Drawable drawable;
+            if(isPic(source)) {
+                String picDir = FileDealer.getPicDirPath() + source.substring(source.lastIndexOf("/"));
+                File file = new File(picDir);
+                int width = (int) (getWindowManager().getDefaultDisplay().getWidth() * 0.9);
+
+                if (picMap != null && picMap.containsKey(picDir) && !picMap.get(picDir).isRecycled()) {
+                    Bitmap bm= picMap.get(picDir);
+                    drawable = new BitmapDrawable(bm);
+                    int bmWidth = bm.getWidth();
+                    int bmHeight = bm.getHeight();
+                    drawable.setBounds(0, 0, width, width * bmHeight / bmWidth);
+                    return drawable;
+                } else if (file.exists() && BitmapFactory.decodeFile(picDir) != null) {
+                    if (picMap == null) {
+                        picMap = new HashMap<String, Bitmap>();
+                    }
+                    Bitmap bm = BitmapFactory.decodeFile(picDir);
+                    picMap.put(picDir, bm);
+                    drawable = new BitmapDrawable(bm);
+                    int bmWidth = bm.getWidth();
+                    int bmHeight = bm.getHeight();
+                    drawable.setBounds(0, 0, width, width * bmHeight / bmWidth);
+                    return drawable;
+                } else {
+                    drawable = getResources().getDrawable(R.drawable.downloading);
+                    drawable.setBounds(0, 0, width, width * drawable.getIntrinsicHeight() / drawable.getIntrinsicWidth());
+                    return drawable;
+                }
+            } else if(source.equals("emotion_s")) {
+                drawable = getResources().getDrawable(R.drawable.emotion_s);
+                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                return drawable;
+            } else if(source.equals("emotion_o")) {
+                drawable = getResources().getDrawable(R.drawable.emotion_o);
+                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                return drawable;
+            } else if(source.equals("emotion_v")) {
+                drawable = getResources().getDrawable(R.drawable.emotion_v);
+                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                return drawable;
+            } else if(source.equals("emotion_d")) {
+                drawable = getResources().getDrawable(R.drawable.emotion_d);
+                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                return drawable;
+            } else if(source.equals("emotion_x")) {
+                drawable = getResources().getDrawable(R.drawable.emotion_x);
+                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                return drawable;
+            } else if(source.equals("emotion_q")) {
+                drawable = getResources().getDrawable(R.drawable.emotion_q);
+                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                return drawable;
+            } else if(source.equals("emotion_a")) {
+                drawable = getResources().getDrawable(R.drawable.emotion_a);
+                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                return drawable;
+            }else if(source.equals("emotion_p")) {
+                drawable = getResources().getDrawable(R.drawable.emotion_p);
+                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                return drawable;
+            }else if(source.equals("emotion_e")) {
+                drawable = getResources().getDrawable(R.drawable.emotion_e);
+                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                return drawable;
+            }else if(source.equals("emotion_h")) {
+                drawable = getResources().getDrawable(R.drawable.emotion_h);
+                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                return drawable;
+            }else if(source.equals("emotion_b")) {
+                drawable = getResources().getDrawable(R.drawable.emotion_b);
+                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                return drawable;
+            }else if(source.equals("emotion_c")) {
+                drawable = getResources().getDrawable(R.drawable.emotion_c);
+                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                return drawable;
+            }else if(source.equals("emotion_f")) {
+                drawable = getResources().getDrawable(R.drawable.emotion_f);
+                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                return drawable;
+            }else if(source.equals("emotion_g")) {
+                drawable = getResources().getDrawable(R.drawable.emotion_g);
+                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                return drawable;
+            }else if(source.equals("emotion_i")) {
+                drawable = getResources().getDrawable(R.drawable.emotion_i);
+                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                return drawable;
+            }else if(source.equals("emotion_j")) {
+                drawable = getResources().getDrawable(R.drawable.emotion_j);
+                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                return drawable;
+            }else if(source.equals("emotion_k")) {
+                drawable = getResources().getDrawable(R.drawable.emotion_k);
+                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                return drawable;
+            }else if(source.equals("emotion_l")) {
+                drawable = getResources().getDrawable(R.drawable.emotion_l);
+                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                return drawable;
+            }else if(source.equals("emotion_m")) {
+                drawable = getResources().getDrawable(R.drawable.emotion_m);
+                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                return drawable;
+            }else if(source.equals("emotion_n")) {
+                drawable = getResources().getDrawable(R.drawable.emotion_n);
+                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                return drawable;
+            }else if(source.equals("emotion_r")) {
+                drawable = getResources().getDrawable(R.drawable.emotion_r);
+                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                return drawable;
+            }else if(source.equals("emotion_t")) {
+                drawable = getResources().getDrawable(R.drawable.emotion_t);
+                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                return drawable;
+            }else if(source.equals("emotion_u") ) {
+                drawable = getResources().getDrawable(R.drawable.emotion_u);
+                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                return drawable;
+            }else if(source.equals("emotion_w")) {
+                drawable = getResources().getDrawable(R.drawable.emotion_w);
+                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                return drawable;
+            }else if(source.equals("emotion_y")) {
+                drawable = getResources().getDrawable(R.drawable.emotion_y);
+                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                return drawable;
+            }else if(source.equals("emotion_z")) {
+                drawable = getResources().getDrawable(R.drawable.emotion_z);
+                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                return drawable;
+            }else if(source.equals("emotion_0")) {
+                drawable = getResources().getDrawable(R.drawable.emotion_0);
+                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                return drawable;
+            }
+            else if(source.equals("emotion_1")) {
+                drawable = getResources().getDrawable(R.drawable.emotion_1);
+                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                return drawable;
+            }
+            else if(source.equals("emotion_2")) {
+                drawable = getResources().getDrawable(R.drawable.emotion_2);
+                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                return drawable;
+            }
+            else if(source.equals("emotion_3")) {
+                drawable = getResources().getDrawable(R.drawable.emotion_3);
+                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                return drawable;
+            }
+            else if(source.equals("emotion_4")) {
+                drawable = getResources().getDrawable(R.drawable.emotion_4);
+                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                return drawable;
+            }
+            else if(source.equals("emotion_5")) {
+                drawable = getResources().getDrawable(R.drawable.emotion_5);
+                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                return drawable;
+            }
+            else if(source.equals("emotion_6")) {
+                drawable = getResources().getDrawable(R.drawable.emotion_6);
+                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                return drawable;
+            }
+            else if(source.equals("emotion_7")) {
+                drawable = getResources().getDrawable(R.drawable.emotion_7);
+                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                return drawable;
+            }
+            else if(source.equals("emotion_8")) {
+                drawable = getResources().getDrawable(R.drawable.emotion_8);
+                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                return drawable;
+            }
+            else if(source.equals("emotion_9")) {
+                drawable = getResources().getDrawable(R.drawable.emotion_9);
+                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                return drawable;
+            }
+            return null;
+        }
+    };
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
@@ -461,10 +543,10 @@ public class ArticleActivity extends SherlockFragmentActivity {
                     }else{
                         currentPage = 0;
                     }
-                    initList(false);
+                    initList(true);
                 }else{
                     currentPage = currentPage - 30;
-                    initList(false);
+                    initList(true);
                 }
                 break;
             case R.id.post:
@@ -473,7 +555,7 @@ public class ArticleActivity extends SherlockFragmentActivity {
                         Toast.makeText(this, "本篇没有下30个主题", Toast.LENGTH_SHORT).show();
                     }else{
                         currentPage = currentPage + 30;
-                        initList(false);
+                        initList(true);
                     }
                 }else if(currentPage < 0){
                     Toast.makeText(this, "本篇没有下30个主题", Toast.LENGTH_SHORT).show();
@@ -482,14 +564,14 @@ public class ArticleActivity extends SherlockFragmentActivity {
                         Toast.makeText(this, "本篇没有下30个主题", Toast.LENGTH_SHORT).show();
                     }else{
                         currentPage = currentPage + 30;
-                        initList(false);
+                        initList(true);
                     }
                 }
 
                 break;
             case R.id.all:
                 currentPage = -1;
-                initList(false);
+                initList(true);
         }
 
         return super.onOptionsItemSelected(item);
