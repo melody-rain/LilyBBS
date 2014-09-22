@@ -21,7 +21,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import android.os.Handler;
-import com.os.ui.MainHallFragment;
 import com.os.utility.DatabaseDealer;
 import com.os.utility.DocParser;
 

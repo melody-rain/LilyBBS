@@ -159,7 +159,7 @@ public class ArticleActivity extends SherlockFragmentActivity {
                         } else if (file.exists() && !picMap.containsKey(picDir)) {
                             picMap.put(picDir, BitmapFactory.decodeFile(picDir));
                         } else if (!file.exists() && (picMap != null && picMap.containsKey(picDir)
-                                && !picMap.get(picDir).isRecycled()) /*&& DatabaseDealer.getSettings(ArticleActivity.this).isSavePic()*/) {
+                                && !picMap.get(picDir).isRecycled()) && false/*DatabaseDealer.getSettings(ArticleActivity.this).isSavePic()*/) {
                             FileDealer.writeBitmap(picMap.get(picDir),picDir);
                         } else {
                             if(picMap == null) {

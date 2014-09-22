@@ -105,6 +105,7 @@ public class MainHallFragment extends BaseSlidingFragment implements OnClickList
         mHomePage.setOnClickListener(this);
         mFocus.setOnClickListener(this);
         mMine.setOnClickListener(this);
+        hotNews.setOnClickListener(this);
     }
 
 

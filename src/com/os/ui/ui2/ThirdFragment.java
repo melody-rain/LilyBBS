@@ -154,7 +154,16 @@ public class ThirdFragment extends Fragment {
                     intent.putExtra("boardName", boardName);
                     intent.putExtra("ChineseName", boardFullName.substring(boardFullName.indexOf("(") + 1, boardFullName.indexOf(")")));
                     startActivity(intent);
-//                    context.startActivity(intent);
+                }
+            });
+
+            view.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    String boardName = boardFullName.substring(0, boardFullName.indexOf("("));
+                    Toast.makeText(getActivity(), boardName, Toast.LENGTH_SHORT).show();
+                    List<String> favList = new ArrayList<String>();
+                    return true;
                 }
             });
             return view;

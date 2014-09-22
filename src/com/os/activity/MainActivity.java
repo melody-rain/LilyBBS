@@ -22,7 +22,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import com.os.ui.FollowFragment;
-import com.os.ui.MainHallFragment;
 import com.os.ui.RankFragment;
 import com.os.utility.DatabaseDealer;
 import com.os.utility.DocParser;
@@ -34,7 +33,6 @@ public class MainActivity extends BaseFragmentActivity {
     public List<Article> topList;
     private Thread getUserInfo;
 
-    private MainHallFragment mainHallFragment;
     private RankFragment rankFragment;
     private FollowFragment followFragment;
     public boolean isQuit;
