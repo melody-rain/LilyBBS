@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/pre"
+          android:title="本主题上30篇"/>
+    <item android:id="@+id/post"
+          android:title="本主题下30篇"/>
+    <item android:id="@+id/all"
+          android:title="本主题全部"/>
+</menu>

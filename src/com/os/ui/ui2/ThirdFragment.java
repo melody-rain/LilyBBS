@@ -161,12 +161,15 @@ public class ThirdFragment extends Fragment {
         }
 
         public void filter(String charText) {
+            String tmpCharText = charText.toLowerCase();
+            String tmpS;
             list.clear();
             if (charText.length() == 0) {
                 list.addAll(arrayList);
             } else {
                 for (String s : arrayList) {
-                    if (s.contains(charText)) {
+                    tmpS = s.toLowerCase();
+                    if (tmpS.contains(charText)) {
                         list.add(s);
                     }
                 }

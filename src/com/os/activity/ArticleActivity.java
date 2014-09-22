@@ -17,11 +17,15 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 import com.os.activity.sliding.SingleArticle;
 import com.os.slidingmenu.R;
+import com.os.ui.ui2.NewArticleFragment;
 import com.os.ui.ui2.ReplyArticleFragment;
 import com.os.utility.DatabaseDealer;
 import com.os.utility.DocParser;
@@ -49,12 +53,11 @@ public class ArticleActivity extends SherlockFragmentActivity {
     private String board;
     private String title;
     private ListView lv;
-    private Thread initContentThread;
     private List<Map<String, Object>> contentList;
     private int currentPage = 0;
     private List<SingleArticle> singleList;
     private int selectedIndex;
-
+    private int totalPage = 0;
     private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -67,9 +70,9 @@ public class ArticleActivity extends SherlockFragmentActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.article);
+
         initComponents();
         initList(true);
-        initContentThread.start();
     }
 
     private void initComponents() {
@@ -83,7 +86,7 @@ public class ArticleActivity extends SherlockFragmentActivity {
 
     private void initList(boolean loadImage) {
         contentList = new ArrayList<Map<String, Object>>();
-        initContentThread = new Thread(new Runnable() {
+        Thread initContentThread = new Thread(new Runnable() {
             @Override
             public void run() {
                 List<Map<String, Object>> contentListTmp;
@@ -97,15 +100,18 @@ public class ArticleActivity extends SherlockFragmentActivity {
                 }
             }
         });
+        initContentThread.start();
     }
 
     private List<Map<String, Object>> getData() {
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
         String pageString = "";
-        if (currentPage > 0) {
+        if (currentPage != 0) {
             pageString = "&start=" + String.valueOf(currentPage);
         }
+
         singleList = DocParser.getSingleArticleList(this.getIntent().getStringExtra("contentUrl") + pageString, 3, DatabaseDealer.getBlockList(ArticleActivity.this));
+        totalPage = Integer.parseInt(singleList.get(singleList.size() - 1).getAuthorName());
         if (singleList == null) {
             return null;
         }
@@ -113,7 +119,17 @@ public class ArticleActivity extends SherlockFragmentActivity {
             SingleArticle article = singleList.get(i);
             Map<String, Object> map = new HashMap<String, Object>();
             map.put("author", "作者:" + article.getAuthorName());
-            map.put("floor", singleList.indexOf(article) + "楼");
+
+            if(i == 0){
+                map.put("floor", "楼主");
+            }else {
+                if(currentPage != -1){
+                    map.put("floor", singleList.indexOf(article) + currentPage + "楼");
+                }else {
+                    map.put("floor", singleList.indexOf(article) + "楼");
+                }
+            }
+
             map.put("content", article.getContent());
             list.add(map);
         }
@@ -420,4 +436,62 @@ public class ArticleActivity extends SherlockFragmentActivity {
 //            return null;
 //        }
 //    };
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu){
+        MenuInflater inflater = getSupportMenuInflater();
+        inflater.inflate(R.menu.more_article, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+        int fragment0 = totalPage / 30;
+        int fragment1 = totalPage % 30;
+        switch (item.getItemId()){
+            case R.id.pre:
+                if(currentPage == 0){
+                    Toast.makeText(this, "已经在首页", Toast.LENGTH_SHORT).show();
+                }else if(currentPage == -1){
+                    if(fragment0 > 0){
+                        currentPage = (fragment0 - 1) * 30;
+                        if(fragment1 == 0){
+                            currentPage = currentPage - 30;
+                        }
+                    }else{
+                        currentPage = 0;
+                    }
+                    initList(false);
+                }else{
+                    currentPage = currentPage - 30;
+                    initList(false);
+                }
+                break;
+            case R.id.post:
+                if(currentPage > 0){
+                    if(currentPage >= fragment0 * 30){
+                        Toast.makeText(this, "本篇没有下30个主题", Toast.LENGTH_SHORT).show();
+                    }else{
+                        currentPage = currentPage + 30;
+                        initList(false);
+                    }
+                }else if(currentPage < 0){
+                    Toast.makeText(this, "本篇没有下30个主题", Toast.LENGTH_SHORT).show();
+                }else{
+                    if(fragment0 == 0){
+                        Toast.makeText(this, "本篇没有下30个主题", Toast.LENGTH_SHORT).show();
+                    }else{
+                        currentPage = currentPage + 30;
+                        initList(false);
+                    }
+                }
+
+                break;
+            case R.id.all:
+                currentPage = -1;
+                initList(false);
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
 }
