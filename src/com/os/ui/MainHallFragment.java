@@ -34,8 +34,6 @@ public class MainHallFragment extends BaseSlidingFragment implements OnClickList
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.x_hall);
-
-        getActivity().getSupportFragmentManager().beginTransaction().add(new SecondFragment(), "SecondFragment").commit();
     }
 
     @Override

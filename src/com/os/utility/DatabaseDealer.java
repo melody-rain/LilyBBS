@@ -98,4 +98,34 @@ public class DatabaseDealer {
         db.close();
         return fav;
     }
+
+    public static List<String> getFavBoardList(Context context){
+        SQLiteDatabase db = createDataBase(context);
+        Cursor cursor = db.rawQuery("select distinct english, chinese from fav", null);
+        List<String> fav = new ArrayList<String>();
+        while (cursor.moveToNext()){
+            fav.add(cursor.getString(0) + "(" + cursor.getString(1) + ")");
+        }
+
+        cursor.close();
+        db.close();
+        return  fav;
+    }
+
+    public static boolean updateFavList(Context context, String favBoardCN, String favBoardEN){
+
+        try {
+            SQLiteDatabase db = createDataBase(context);
+            ContentValues values = new ContentValues();
+            values.put("english", favBoardEN);
+            values.put("chinese", favBoardCN);
+            db.insert("fav", null, values);
+            db.close();
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+
+        return true;
+    }
 }

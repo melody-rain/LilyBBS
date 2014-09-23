@@ -98,9 +98,17 @@ public class ThirdFragment extends Fragment implements SecondFragment.UpdateFavL
 
     @Override
     public void updateFav(String favName) {
-        SecondFragment secondFragment = (SecondFragment)getActivity().getSupportFragmentManager().findFragmentByTag("SecondFragment");
-        secondFragment.getFavList().add(favName);
-        secondFragment.notifyAdapter();
+        SecondFragment secondFragment = (SecondFragment)getActivity().getSupportFragmentManager().findFragmentByTag(SecondFragment.fragmentTag());
+        String boardNameEN = favName.substring(0, favName.indexOf("("));
+        String boardNameCN = favName.substring(favName.indexOf("(") + 1, favName.indexOf(")"));
+        if(!secondFragment.getFavList().contains(favName)){
+            secondFragment.getFavList().add(favName);
+            if(secondFragment.updateDatabase(boardNameCN, boardNameEN)){
+                secondFragment.notifyAdapter();
+            }
+        }else {
+            Toast.makeText(getActivity(), favName + "已经被添加过", Toast.LENGTH_SHORT).show();
+        }
     }
 
     class MyComparator implements Comparator {
@@ -169,7 +177,6 @@ public class ThirdFragment extends Fragment implements SecondFragment.UpdateFavL
                 @Override
                 public boolean onLongClick(View v) {
                     String boardName = boardFullName.substring(0, boardFullName.indexOf("("));
-                    Toast.makeText(getActivity(), boardName, Toast.LENGTH_SHORT).show();
                     updateFav(boardFullName);
                     return true;
                 }
