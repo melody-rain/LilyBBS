@@ -20,7 +20,7 @@ import com.os.utility.DatabaseDealer;
 
 import java.util.*;
 
-public class ThirdFragment extends Fragment {
+public class ThirdFragment extends Fragment implements SecondFragment.UpdateFavList{
 
     private View view;
     private List<String> allItems;
@@ -30,6 +30,7 @@ public class ThirdFragment extends Fragment {
     private EditText searchBoard;
     private ArrayAdapter arrayAdapter;
     private ListViewAdapterWithFilter lvf;
+
     private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -91,8 +92,15 @@ public class ThirdFragment extends Fragment {
 //                lvf.filter(text);
             }
         });
-
+//        getActivity().getSupportFragmentManager().beginTransaction().add(this, "ThirdFragment").commit();
         return view;
+    }
+
+    @Override
+    public void updateFav(String favName) {
+        SecondFragment secondFragment = (SecondFragment)getActivity().getSupportFragmentManager().findFragmentByTag("SecondFragment");
+        secondFragment.getFavList().add(favName);
+        secondFragment.notifyAdapter();
     }
 
     class MyComparator implements Comparator {
@@ -162,7 +170,7 @@ public class ThirdFragment extends Fragment {
                 public boolean onLongClick(View v) {
                     String boardName = boardFullName.substring(0, boardFullName.indexOf("("));
                     Toast.makeText(getActivity(), boardName, Toast.LENGTH_SHORT).show();
-                    List<String> favList = new ArrayList<String>();
+                    updateFav(boardFullName);
                     return true;
                 }
             });
