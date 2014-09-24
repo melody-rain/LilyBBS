@@ -103,7 +103,7 @@ public class ThirdFragment extends Fragment implements SecondFragment.UpdateFavL
         String boardNameCN = favName.substring(favName.indexOf("(") + 1, favName.indexOf(")"));
         if(!secondFragment.getFavList().contains(favName)){
             secondFragment.getFavList().add(favName);
-            if(secondFragment.updateDatabase(boardNameCN, boardNameEN)){
+            if(secondFragment.updateDatabase(boardNameCN, boardNameEN, true, 0)){
                 secondFragment.notifyAdapter();
             }
         }else {

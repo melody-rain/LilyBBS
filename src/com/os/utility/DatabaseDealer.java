@@ -27,6 +27,10 @@ public class DatabaseDealer {
         return dbHelper.getReadableDatabase();
     }
 
+    private static final SQLiteDatabase createWritableDataBase(Context context){
+        DatabaseHelper dbHelper = new DatabaseHelper(context, DEFAULT_DATABASE_NAME);
+        return dbHelper.getWritableDatabase();
+    }
     public static final List<String> getBlockList(Context context) {
         SQLiteDatabase db = createDatabase(context);
         Cursor cursor = db.rawQuery("select name from block", null);
@@ -112,20 +116,40 @@ public class DatabaseDealer {
         return  fav;
     }
 
-    public static boolean updateFavList(Context context, String favBoardCN, String favBoardEN){
+    public static boolean updateFavList(Context context, String favBoardCN, String favBoardEN, boolean isInsert, int id){
 
         try {
-            SQLiteDatabase db = createDataBase(context);
-            ContentValues values = new ContentValues();
-            values.put("english", favBoardEN);
-            values.put("chinese", favBoardCN);
-            db.insert("fav", null, values);
-            db.close();
+            if(isInsert){
+                SQLiteDatabase db = createDataBase(context);
+
+                ContentValues values = new ContentValues();
+                values.put("english", favBoardEN);
+                values.put("chinese", favBoardCN);
+                db.insert("fav", null, values);
+                db.close();
+                return true;
+            }else {
+                SQLiteDatabase db = createDataBase(context);
+                db.execSQL("delete from fav where _id = " + id);
+                db.close();
+                return true;
+//                Cursor cursor = db.rawQuery("select distinct english, chinese from fav", null);
+//                while (cursor.moveToNext()){
+//                    int _ID = cursor.getPosition();
+//                    if(cursor.getString(0).equals(favBoardEN) && cursor.getString(1).equals(favBoardCN)){
+//                        int ret = db.delete("fav", "english = " + favBoardEN, null);
+////                        int ret = db.delete("fav", "_id = ?", new String[]{Integer.toString(_ID)});
+//                        cursor.close();
+//                        db.close();
+//                        return true;
+//                    }
+//                }
+//                cursor.close();
+                //return false;
+            }
         }catch (Exception e){
             e.printStackTrace();
             return false;
         }
-
-        return true;
     }
 }

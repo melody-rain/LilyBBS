@@ -11,8 +11,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static int VERSION = 1;
     private static String CREATE_USERINFO_TABLE = "create table userinfo(_id INTEGER PRIMARY KEY,username text,password text,isAutoLogin integer)";
-    private static String CREATE_BOARD_TABLE = "create table board(_id INTEGER PRIMARY KEY,english text,chinese text)";
-    private static String CREATE_FAV_TABLE = "create table fav(_id INTEGER PRIMARY KEY,english text,chinese text,islocal integer)";
+    private static String CREATE_BOARD_TABLE = "create table board(_id INTEGER PRIMARY KEY,english text not null,chinese text not null)";
+    private static String CREATE_FAV_TABLE = "create table fav(_id INTEGER PRIMARY KEY autoincrement,english text,chinese text,islocal integer)";
     private static String CREATE_SETTING_TABLE = "create table settings(_id INTEGER PRIMARY KEY,key text,value text)";
     private static String CREATE_BLOCK_TABLE = "create table block(_id INTEGER PRIMARY KEY,name text)";
 

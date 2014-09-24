@@ -6,9 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.*;
 
 import android.widget.BaseAdapter;
 import android.widget.ListView;
@@ -22,17 +20,32 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public class SecondFragment extends Fragment {
+public class SecondFragment extends Fragment{
 
 	private View viewFragment;
     private ArrayList<String> favList;
     private View view;
     private ListView listView;
     private ListViewAdapterWithFilter lvf;
+    private String boardToRemove;
 
-    public SecondFragment(){
-        Log.i("DD", "DD");
+    @Override
+    public boolean onContextItemSelected(MenuItem item){
+        switch (item.getItemId()){
+            case 0:
+                String EN = boardToRemove.substring(0, boardToRemove.indexOf("("));
+                String CN = boardToRemove.substring(boardToRemove.indexOf("(") + 1, boardToRemove.indexOf(")"));
+                if(updateDatabase(CN, EN, false, favList.indexOf(boardToRemove))){
+                    favList.remove(boardToRemove);
+                    lvf.notifyDataSetChanged();
+                }
+                break;
+            case 1:
+                break;
+        }
+        return super.onContextItemSelected(item);
     }
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
@@ -47,7 +60,6 @@ public class SecondFragment extends Fragment {
         lvf = new ListViewAdapterWithFilter(getActivity(), favList);
 
         listView.setAdapter(lvf);
-
         return viewFragment;
 	}
 
@@ -125,6 +137,16 @@ public class SecondFragment extends Fragment {
                     startActivity(intent);
                 }
             });
+
+            view.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
+                @Override
+                public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+                    boardToRemove = boardFullName;
+                    menu.add(0, 0, 0, "删除" + boardFullName);
+                    menu.add(0, 1, 0, "取消");
+                }
+            });
+
             return view;
         }
 
@@ -150,12 +172,13 @@ public class SecondFragment extends Fragment {
         lvf.notifyDataSetChanged();
     }
 
-    public boolean updateDatabase(String boardNameCN, String boardNameEN){
-        if(DatabaseDealer.updateFavList(getActivity(), boardNameCN, boardNameEN)){
-            Toast.makeText(getActivity(), "添加" + boardNameEN + "(" + boardNameCN + ")成功", Toast.LENGTH_SHORT).show();
+    public boolean updateDatabase(String boardNameCN, String boardNameEN, boolean isInsert, int id){
+        String option = isInsert ? "添加" : "删除";
+        if(DatabaseDealer.updateFavList(getActivity(), boardNameCN, boardNameEN, isInsert, id + 1)){
+            Toast.makeText(getActivity(), option + boardNameEN + "(" + boardNameCN + ")成功", Toast.LENGTH_SHORT).show();
             return true;
         }else {
-            Toast.makeText(getActivity(), "添加" + boardNameEN + "(" + boardNameCN + ")失败", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), option + boardNameEN + "(" + boardNameCN + ")失败", Toast.LENGTH_SHORT).show();
             return false;
         }
     }
