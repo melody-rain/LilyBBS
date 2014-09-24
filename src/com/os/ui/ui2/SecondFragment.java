@@ -174,7 +174,7 @@ public class SecondFragment extends Fragment{
 
     public boolean updateDatabase(String boardNameCN, String boardNameEN, boolean isInsert, int id){
         String option = isInsert ? "添加" : "删除";
-        if(DatabaseDealer.updateFavList(getActivity(), boardNameCN, boardNameEN, isI8nsert, id + 1)){
+        if(DatabaseDealer.updateFavList(getActivity(), boardNameCN, boardNameEN, isInsert, id)){
             Toast.makeText(getActivity(), option + boardNameEN + "(" + boardNameCN + ")成功", Toast.LENGTH_SHORT).show();
             return true;
         }else {
