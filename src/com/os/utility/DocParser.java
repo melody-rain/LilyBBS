@@ -86,6 +86,8 @@ public class DocParser {
                 article.setAuthorName(authorName);
                 article.setAuthorUrl(links.get(2).select("a").attr("abs:href"));
                 article.setReplyUrl(links.get(1).select("a").attr("abs:href"));
+                String tmp = content.get(0).text();
+                article.setPost_time(tmp.substring(tmp.indexOf("发信站: 南京大学小百合站 (") + 15, tmp.indexOf("发信站: 南京大学小百合站 (") + 39));
                 article.setContent(formatContent(content.get(0).text()));
                 list.add(article);
             }

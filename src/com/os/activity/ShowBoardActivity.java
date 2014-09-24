@@ -13,6 +13,7 @@ import android.widget.*;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.os.model.Article;
 import com.os.slidingmenu.R;
@@ -37,7 +38,8 @@ public class ShowBoardActivity extends SherlockFragmentActivity {
     private ListView boardList;
     private FragmentManager fm;
     private FragmentTransaction fragmentTransaction;
-
+    private String prePageUrl;
+    private String nextPageUrl;
     private String boardName;
 
     public String getBoardName(){
@@ -47,6 +49,7 @@ public class ShowBoardActivity extends SherlockFragmentActivity {
         @Override
         public void handleMessage(Message msg) {
             if (msg.what == 0) {
+                dataMap.clear();
                 List<Map<String, Object>> titleDataTmp = getData();
                 dataMap.addAll(titleDataTmp);
                 sa.notifyDataSetChanged();
@@ -56,13 +59,13 @@ public class ShowBoardActivity extends SherlockFragmentActivity {
         }
     };
 
-    public void initList(String url, final String boardName) {
-        final String boardUrl = url;
+    public void initList(final String fullUrl){
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
                 Message msg = Message.obtain();
-                articleList = DocParser.getBoardArticleTitleList(boardUrl + boardName, boardName, 3, DatabaseDealer.getBlockList(ShowBoardActivity.this));
+                final String fullBoardName = fullUrl;
+                articleList = DocParser.getBoardArticleTitleList(fullBoardName, boardName, 3, DatabaseDealer.getBlockList(ShowBoardActivity.this));
                 if (articleList == null) {
                     msg.what = -1;
                     handler.sendMessage(msg);
@@ -73,6 +76,10 @@ public class ShowBoardActivity extends SherlockFragmentActivity {
             }
         });
         thread.start();
+    }
+
+    public void initList(String url, final String boardName) {
+        initList(url + boardName);
     }
 
     @Override
@@ -115,20 +122,47 @@ public class ShowBoardActivity extends SherlockFragmentActivity {
             map.put("reply", article.getReply() + "/" + article.getView());
             list.add(map);
         }
+
+        Article article = articleList.get(articleList.size() - 1);
+        prePageUrl = article.getBoard() == null ? null : "http://bbs.nju.edu.cn/" + article.getBoard();
+        nextPageUrl = article.getBoardUrl() == null ? null : "http://bbs.nju.edu.cn/" + article.getBoardUrl();
         return list;
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
-        menu.add("新帖").setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT);
-        return true;
+        MenuInflater inflater = getSupportMenuInflater();
+        inflater.inflate(R.menu.more_board, menu);
+        return super.onCreateOptionsMenu(menu);
+
+//        menu.add("新帖").setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+//        menu.add("上一页").setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+//        menu.add("下一页").setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item){
-        fm = getSupportFragmentManager();
-        NewArticleFragment newArticleFragment = new NewArticleFragment();
-        newArticleFragment.show(fm, NewArticleFragment.class.getName());
+        switch (item.getItemId()){
+            case R.id.new_article:
+                fm = getSupportFragmentManager();
+                NewArticleFragment newArticleFragment = new NewArticleFragment();
+                newArticleFragment.show(fm, NewArticleFragment.class.getName());
+                break;
+            case R.id.pre:
+                if(prePageUrl != null){
+                    initList(prePageUrl);
+                }else{
+                    Toast.makeText(this, "没有上一页了", Toast.LENGTH_SHORT).show();
+                }
+                break;
+            case R.id.next:
+                if(nextPageUrl != null){
+                    initList(nextPageUrl);
+                }else {
+                    Toast.makeText(this, "没有下一页了", Toast.LENGTH_SHORT).show();
+                }
+                break;
+        }
         return true;
     }
 

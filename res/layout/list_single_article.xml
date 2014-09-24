@@ -42,7 +42,16 @@
                 android:layout_alignBaseline="@+id/sa_author"
                 android:textColor="#08298A" />
     </RelativeLayout>
-
+    <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dip"
+            android:layout_marginTop="5dip"
+            android:layout_marginBottom="10dip"
+            android:layout_marginRight="10dip"
+            android:textColor="#08298A"
+            android:textSize="15dip"
+            android:id="@+id/post_time"/>
     <TextView
             android:id="@+id/sa_content"
             android:autoLink="web"

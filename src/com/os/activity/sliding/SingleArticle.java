@@ -8,6 +8,7 @@ public class SingleArticle {
     private String authorName;
     private String authorUrl;
     private String replyUrl;
+    private String post_time;
 
     public String getContent() {
         return content;
@@ -32,5 +33,13 @@ public class SingleArticle {
     }
     public void setReplyUrl(String replyUrl) {
         this.replyUrl = replyUrl;
+    }
+
+    public String getPost_time(){
+        return post_time;
+    }
+
+    public void setPost_time(String post_time){
+        this.post_time = post_time;
     }
 }

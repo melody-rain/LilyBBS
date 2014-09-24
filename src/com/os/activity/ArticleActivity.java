@@ -213,6 +213,7 @@ public class ArticleActivity extends SherlockFragmentActivity {
             }
 
             map.put("content", article.getContent());
+            map.put("post_time", article.getPost_time());
             list.add(map);
         }
         return list;
@@ -226,6 +227,7 @@ public class ArticleActivity extends SherlockFragmentActivity {
         private TextView floor;
         private TextView content;
         private TextView reply;
+        private TextView post_time;
 
         public MyListAdapter(int layoutID) {
             this.layoutID = layoutID;
@@ -253,11 +255,14 @@ public class ArticleActivity extends SherlockFragmentActivity {
             floor = (TextView) view.findViewById(R.id.sa_floor);
             content = (TextView) view.findViewById(R.id.sa_content);
             reply = (TextView) view.findViewById(R.id.sa_reply);
+            post_time = (TextView) view.findViewById(R.id.post_time);
 
             Map<String, Object> map = contentList.get(position);
             author.setText((CharSequence) map.get("author"));
             floor.setText((CharSequence) map.get("floor"));
             String articleContent = (String) map.get("content");
+            post_time.setText("发表时间：" + map.get("post_time"));
+
             if (articleContent.contains("<img src='") || articleContent.contains("<uid>")) {
                 content.setText(Html.fromHtml(articleContent, imageGetter, null));
             } else {
